@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Калькулятор зворотнього азимута</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+
+        .input-group {
+            margin-bottom: 30px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+        }
+
+        input {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .result {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 30px;
+        }
+
+        .compass {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin: 0 auto;
+        }
+
+        .compass-circle {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: linear-gradient(to bottom, #f0f0f0, #e0e0e0);
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.1), 0 5px 15px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+
+        .compass-center {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: #333;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+        }
+
+        .arrow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform-origin: center;
+            transition: transform 0.5s ease;
+            z-index: 5;
+        }
+
+        .arrow-direct {
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-bottom: 120px solid #e74c3c;
+            position: absolute;
+            top: -120px;
+            left: -8px;
+        }
+
+        .arrow-reverse {
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-top: 120px solid #3498db;
+            position: absolute;
+            top: 0;
+            left: -8px;
+        }
+
+        .cardinal-points {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+        }
+
+        .cardinal {
+            position: absolute;
+            font-weight: bold;
+            font-size: 20px;
+            color: #333;
+        }
+
+        .n { top: 10px; left: 50%; transform: translateX(-50%); }
+        .e { top: 50%; right: 10px; transform: translateY(-50%); }
+        .s { bottom: 10px; left: 50%; transform: translateX(-50%); }
+        .w { top: 50%; left: 10px; transform: translateY(-50%); }
+
+        .scale-marks {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+        }
+
+        .mark {
+            position: absolute;
+            width: 2px;
+            height: 10px;
+            background: #666;
+            left: 50%;
+            top: 0;
+            transform-origin: 50% 150px;
+        }
+
+        .mark.major {
+            height: 15px;
+            width: 3px;
+            background: #333;
+        }
+
+        .degree-label {
+            position: absolute;
+            left: 50%;
+            top: 20px;
+            transform-origin: 50% 130px;
+            font-size: 12px;
+            color: #666;
+        }
+
+.copyright {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            font-size: 12px;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧭 Калькулятор зворотнього азимута</h1>
+        
+        <div class="input-group">
+            <label for="azimuth">Азимут (°):</label>
+            <input type="number" id="azimuth" min="0" max="360" step="0.1" placeholder="Введіть азимут 0-360°">
+        </div>
+
+        <div class="result" id="result">Зворотній азимут: ---</div>
+
+        <div class="compass">
+            <div class="compass-circle">
+                <div class="scale-marks" id="scaleMarks"></div>
+                <div class="cardinal-points">
+                    <div class="cardinal n">N<br>0°</div>
+                    <div class="cardinal e">E<br>90°</div>
+                    <div class="cardinal s">S<br>180°</div>
+                    <div class="cardinal w">W<br>270°</div>
+                </div>
+                <div class="arrow" id="arrow">
+                    <div class="arrow-direct"></div>
+                    <div class="arrow-reverse"></div>
+                </div>
+                <div class="compass-center"></div>
+            </div>
+        </div>
+
+<div class="copyright">
+            <div class=""><a href="https://github.com/pekarskyi/distance_calculator" target="_blank">Сторінка скрипта</a></div>
+            <div class="">Автор <a href="https://github.com/pekarskyi" target="_blank">Reset</a>, v.1.0.0</div>
+        </div>
+
+    </div>
+
+    <script>
+        const azimuthInput = document.getElementById('azimuth');
+        const resultDiv = document.getElementById('result');
+        const arrow = document.getElementById('arrow');
+        const scaleMarks = document.getElementById('scaleMarks');
+
+        // Створення шкали
+        for (let i = 0; i < 360; i += 10) {
+            const mark = document.createElement('div');
+            mark.className = i % 30 === 0 ? 'mark major' : 'mark';
+            mark.style.transform = `translateX(-50%) rotate(${i}deg)`;
+            scaleMarks.appendChild(mark);
+
+            if (i % 30 === 0 && i !== 0 && i !== 90 && i !== 180 && i !== 270) {
+                const label = document.createElement('div');
+                label.className = 'degree-label';
+                label.textContent = i + '°';
+                label.style.transform = `translateX(-50%) rotate(${i}deg)`;
+                scaleMarks.appendChild(label);
+            }
+        }
+
+        function calculateReverseAzimuth(azimuth) {
+            let reverse = azimuth + 180;
+            if (reverse >= 360) {
+                reverse -= 360;
+            }
+            return reverse;
+        }
+
+        azimuthInput.addEventListener('input', function() {
+            let value = parseFloat(this.value);
+            
+            if (isNaN(value)) {
+                resultDiv.textContent = 'Зворотній азимут: ---';
+                arrow.style.transform = 'rotate(0deg)';
+                return;
+            }
+
+            // Нормалізація значення
+            if (value < 0) value = 0;
+            if (value > 360) value = 360;
+            this.value = value;
+
+            const reverseAzimuth = calculateReverseAzimuth(value);
+            resultDiv.textContent = `Зворотній азимут: ${reverseAzimuth.toFixed(1)}°`;
+            
+            // Обертання стрілки (червона вказує на прямий азимут)
+            arrow.style.transform = `rotate(${value}deg)`;
+        });
+    </script>
+</body>
+</html>
